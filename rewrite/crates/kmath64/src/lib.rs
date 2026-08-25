@@ -80,7 +80,11 @@ pub const MUL_OVERFLOW: u64 = u64::MAX;
 #[inline]
 #[must_use]
 pub const fn fls32(x: u32) -> u32 {
-    if x == 0 { 0 } else { 32 - x.leading_zeros() }
+    if x == 0 {
+        0
+    } else {
+        32 - x.leading_zeros()
+    }
 }
 
 /// Kernel `__ffs(x)` for `unsigned long`: 0-based index of the least
@@ -219,7 +223,11 @@ pub fn div_s64_rem(dividend: i64, divisor: i32) -> (i64, i32) {
     // stay total; the only magnitude that cannot be re-signed is 2^63 with a
     // negative sign, which is exactly the rejected MIN / -1 case.
     let negative = (dividend < 0) ^ (divisor < 0);
-    let quotient_i128 = if negative { -(q_mag as i128) } else { q_mag as i128 };
+    let quotient_i128 = if negative {
+        -(q_mag as i128)
+    } else {
+        q_mag as i128
+    };
     debug_assert!(
         (i64::MIN as i128..=i64::MAX as i128).contains(&quotient_i128),
         "unreachable: overflowing quotient escaped the MIN/-1 guard"
@@ -529,7 +537,10 @@ pub fn mul_u64_u64_div_u64_roundup(a: u64, b: u64, d: u64) -> u64 {
 #[inline]
 #[must_use]
 pub const fn mul_u64_u32_add_u64_shr(a: u64, mul: u32, b: u64, shift: u32) -> u64 {
-    debug_assert!(shift < 64, "mul_u64_u32_add_u64_shr: shift >= 64 is UB in C");
+    debug_assert!(
+        shift < 64,
+        "mul_u64_u32_add_u64_shr: shift >= 64 is UB in C"
+    );
     ((((a as u128) * mul as u128).wrapping_add(b as u128)) >> shift) as u64
 }
 

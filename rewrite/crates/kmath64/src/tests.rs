@@ -45,18 +45,8 @@ const TEST_DIV64_DIVIDENDS: [u64; 12] = [
     0xffffffffffffffff,
 ];
 const TEST_DIV64_DIVISORS: [u32; 12] = [
-    0x00000009,
-    0x0000007c,
-    0x00000204,
-    0x0000cb5b,
-    0x00010000,
-    0x0008a880,
-    0x003fd3ae,
-    0x0b658fac,
-    0x80000001,
-    0xdc08b349,
-    0xfffffffe,
-    0xffffffff,
+    0x00000009, 0x0000007c, 0x00000204, 0x0000cb5b, 0x00010000, 0x0008a880, 0x003fd3ae, 0x0b658fac,
+    0x80000001, 0xdc08b349, 0xfffffffe, 0xffffffff,
 ];
 // (quotient, remainder) indexed [dividend][divisor]
 const TEST_DIV64_RESULTS: [[(u64, u32); 12]; 12] = [
@@ -239,27 +229,135 @@ const MUL_TEST_VALUES: [(u64, u64, u64, u64, u8); 28] = [
     (0x1ffffffff, 0xffffffff, 0x2, 0xfffffffe80000000, 1),
     (0x1ffffffff, 0xffffffff, 0x3, 0xaaaaaaa9aaaaaaab, 0),
     (0x1ffffffff, 0x1ffffffff, 0x4, 0xffffffff00000000, 1),
-    (0xffff000000000000, 0xffff000000000000, 0xffff000000000001, 0xfffeffffffffffff, 1),
-    (0x3333333333333333, 0x3333333333333333, 0x5555555555555555, 0x1eb851eb851eb851, 1),
+    (
+        0xffff000000000000,
+        0xffff000000000000,
+        0xffff000000000001,
+        0xfffeffffffffffff,
+        1,
+    ),
+    (
+        0x3333333333333333,
+        0x3333333333333333,
+        0x5555555555555555,
+        0x1eb851eb851eb851,
+        1,
+    ),
     (0x7fffffffffffffff, 0x2, 0x3, 0x5555555555555554, 1),
     (0xffffffffffffffff, 0x2, 0x8000000000000000, 0x3, 1),
     (0xffffffffffffffff, 0x2, 0xc000000000000000, 0x2, 1),
-    (0xffffffffffffffff, 0x4000000000000004, 0x8000000000000000, 0x8000000000000007, 1),
-    (0xffffffffffffffff, 0x4000000000000001, 0x8000000000000000, 0x8000000000000001, 1),
-    (0xffffffffffffffff, 0x8000000000000001, 0xffffffffffffffff, 0x8000000000000001, 0),
-    (0xfffffffffffffffe, 0x8000000000000001, 0xffffffffffffffff, 0x8000000000000000, 1),
-    (0xffffffffffffffff, 0x8000000000000001, 0xfffffffffffffffe, 0x8000000000000001, 1),
-    (0xffffffffffffffff, 0x8000000000000001, 0xfffffffffffffffd, 0x8000000000000002, 1),
-    (0x7fffffffffffffff, 0xffffffffffffffff, 0xc000000000000000, 0xaaaaaaaaaaaaaaa8, 1),
-    (0xffffffffffffffff, 0x7fffffffffffffff, 0xa000000000000000, 0xccccccccccccccca, 1),
-    (0xffffffffffffffff, 0x7fffffffffffffff, 0x9000000000000000, 0xe38e38e38e38e38b, 1),
-    (0x7fffffffffffffff, 0x7fffffffffffffff, 0x5000000000000000, 0xccccccccccccccc9, 1),
-    (0xffffffffffffffff, 0xfffffffffffffffe, 0xffffffffffffffff, 0xfffffffffffffffe, 0),
-    (0xe6102d256d7ea3ae, 0x70a77d0be4c31201, 0xd63ec35ab3220357, 0x78f8bf8cc86c6e18, 1),
-    (0xf53bae05cb86c6e1, 0x3847b32d2f8d32e0, 0xcfd4f55a647f403c, 0x42687f79d8998d35, 1),
-    (0x9951c5498f941092, 0x1f8c8bfdf287a251, 0xa3c8dc5f81ea3fe2, 0x1d887cb25900091f, 1),
-    (0x374fee9daa1bb2bb, 0x0d0bfbff7b8ae3ef, 0xc169337bd42d5179, 0x03bb2dbaffcbb961, 1),
-    (0xeac0d03ac10eeaf0, 0x89be05dfa162ed9b, 0x92bb1679a41f0e4b, 0xdc5f5cc9e270d216, 1),
+    (
+        0xffffffffffffffff,
+        0x4000000000000004,
+        0x8000000000000000,
+        0x8000000000000007,
+        1,
+    ),
+    (
+        0xffffffffffffffff,
+        0x4000000000000001,
+        0x8000000000000000,
+        0x8000000000000001,
+        1,
+    ),
+    (
+        0xffffffffffffffff,
+        0x8000000000000001,
+        0xffffffffffffffff,
+        0x8000000000000001,
+        0,
+    ),
+    (
+        0xfffffffffffffffe,
+        0x8000000000000001,
+        0xffffffffffffffff,
+        0x8000000000000000,
+        1,
+    ),
+    (
+        0xffffffffffffffff,
+        0x8000000000000001,
+        0xfffffffffffffffe,
+        0x8000000000000001,
+        1,
+    ),
+    (
+        0xffffffffffffffff,
+        0x8000000000000001,
+        0xfffffffffffffffd,
+        0x8000000000000002,
+        1,
+    ),
+    (
+        0x7fffffffffffffff,
+        0xffffffffffffffff,
+        0xc000000000000000,
+        0xaaaaaaaaaaaaaaa8,
+        1,
+    ),
+    (
+        0xffffffffffffffff,
+        0x7fffffffffffffff,
+        0xa000000000000000,
+        0xccccccccccccccca,
+        1,
+    ),
+    (
+        0xffffffffffffffff,
+        0x7fffffffffffffff,
+        0x9000000000000000,
+        0xe38e38e38e38e38b,
+        1,
+    ),
+    (
+        0x7fffffffffffffff,
+        0x7fffffffffffffff,
+        0x5000000000000000,
+        0xccccccccccccccc9,
+        1,
+    ),
+    (
+        0xffffffffffffffff,
+        0xfffffffffffffffe,
+        0xffffffffffffffff,
+        0xfffffffffffffffe,
+        0,
+    ),
+    (
+        0xe6102d256d7ea3ae,
+        0x70a77d0be4c31201,
+        0xd63ec35ab3220357,
+        0x78f8bf8cc86c6e18,
+        1,
+    ),
+    (
+        0xf53bae05cb86c6e1,
+        0x3847b32d2f8d32e0,
+        0xcfd4f55a647f403c,
+        0x42687f79d8998d35,
+        1,
+    ),
+    (
+        0x9951c5498f941092,
+        0x1f8c8bfdf287a251,
+        0xa3c8dc5f81ea3fe2,
+        0x1d887cb25900091f,
+        1,
+    ),
+    (
+        0x374fee9daa1bb2bb,
+        0x0d0bfbff7b8ae3ef,
+        0xc169337bd42d5179,
+        0x03bb2dbaffcbb961,
+        1,
+    ),
+    (
+        0xeac0d03ac10eeaf0,
+        0x89be05dfa162ed9b,
+        0x92bb1679a41f0e4b,
+        0xdc5f5cc9e270d216,
+        1,
+    ),
 ];
 
 // ---------------------------------------------------------------------------
@@ -327,11 +425,7 @@ fn div64_32_kernel_table() {
     for (ni, &n) in TEST_DIV64_DIVIDENDS.iter().enumerate() {
         for (di, &d) in TEST_DIV64_DIVISORS.iter().enumerate() {
             let (q, r) = div64_32(n, d);
-            assert_eq!(
-                (q, r),
-                TEST_DIV64_RESULTS[ni][di],
-                "n={n:#x} d={d:#x}"
-            );
+            assert_eq!((q, r), TEST_DIV64_RESULTS[ni][di], "n={n:#x} d={d:#x}");
             // and must equal native division
             assert_eq!(q, n / u64::from(d));
             assert_eq!(r as u64, n % u64::from(d));
@@ -375,7 +469,9 @@ fn div64_32_boundaries_vs_native() {
     for (i, &n) in dividends.iter().enumerate() {
         for j in 0..12usize {
             let d = divisors[(i * 31 + j * 17) % divisors.len()];
-            if d == 0 { continue; }
+            if d == 0 {
+                continue;
+            }
             let (q, r) = div64_32(n, d);
             assert_eq!(q, n / u64::from(d), "n={n:#x} d={d:#x}");
             assert_eq!(u64::from(r), n % u64::from(d));
@@ -461,7 +557,10 @@ fn div_s64_rem_random_and_extremes() {
     // i64::MIN with divisor != -1 is well-defined and must work
     for d in [1i32, 2, -2, 3, i32::MAX, i32::MIN] {
         let (q, r) = div_s64_rem(i64::MIN, d);
-        assert_eq!((q, i64::from(r)), (i64::MIN / i64::from(d), i64::MIN % i64::from(d)));
+        assert_eq!(
+            (q, i64::from(r)),
+            (i64::MIN / i64::from(d), i64::MIN % i64::from(d))
+        );
         assert_eq!(div_s64(i64::MIN, d), q);
     }
     // i32::MIN divisor exercises the unsigned-magnitude path (C abs() was UB)
@@ -472,13 +571,13 @@ fn div_s64_rem_random_and_extremes() {
 #[test]
 #[should_panic(expected = "division by zero")]
 fn div_s64_rem_zero_panics() {
-        let _ = div_s64_rem(-1, 0);
+    let _ = div_s64_rem(-1, 0);
 }
 
 #[test]
 #[should_panic(expected = "i64::MIN / -1 overflows")]
 fn div_s64_rem_min_over_minus_one_panics() {
-        let _ = div_s64_rem(i64::MIN, -1);
+    let _ = div_s64_rem(i64::MIN, -1);
 }
 
 // ---------------------------------------------------------------------------
@@ -544,13 +643,13 @@ fn div64_u64_high_divisor_focus() {
 #[test]
 #[should_panic(expected = "division by zero")]
 fn div64_u64_zero_panics() {
-        let _ = div64_u64(42, 0);
+    let _ = div64_u64(42, 0);
 }
 
 #[test]
 #[should_panic(expected = "division by zero")]
 fn div64_u64_rem_zero_panics() {
-        let _ = div64_u64_rem(42, 0);
+    let _ = div64_u64_rem(42, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -595,13 +694,13 @@ fn div64_s64_random_and_extremes() {
 #[test]
 #[should_panic(expected = "division by zero")]
 fn div64_s64_zero_panics() {
-        let _ = div64_s64(-1, 0);
+    let _ = div64_s64(-1, 0);
 }
 
 #[test]
 #[should_panic(expected = "i64::MIN / -1 overflows")]
 fn div64_s64_min_over_minus_one_panics() {
-        let _ = div64_s64(i64::MIN, -1);
+    let _ = div64_s64(i64::MIN, -1);
 }
 
 // ---------------------------------------------------------------------------
@@ -645,7 +744,7 @@ fn iter_div_heavy_sweep() {
 #[should_panic(expected = "division by zero")]
 fn iter_div_zero_panics_instead_of_hanging() {
     // C would loop forever here; the Rust port panics (documented deviation).
-        let _ = iter_div_u64_rem(1, 0);
+    let _ = iter_div_u64_rem(1, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -676,7 +775,6 @@ fn mul_u64_u64_div_u64_kernel_table() {
         expected_up = expected_up.wrapping_add(u64::from(round_up));
         let got_up = mul_u64_u64_div_u64_roundup(a, b, d);
         assert_eq!(got_up, expected_up, "ceil {a:#x}*{b:#x}+/{d:#x}");
-
     }
 }
 
@@ -736,7 +834,10 @@ fn mul_u64_add_u64_div_u64_exhaustive_small() {
 #[test]
 fn mul_u64_add_u64_div_u64_saturation_is_defined() {
     // Quotient truly unrepresentable: saturates to C's defined ~0ULL.
-    assert_eq!(mul_u64_add_u64_div_u64(u64::MAX, u64::MAX, 0, 1), MUL_OVERFLOW);
+    assert_eq!(
+        mul_u64_add_u64_div_u64(u64::MAX, u64::MAX, 0, 1),
+        MUL_OVERFLOW
+    );
     assert_eq!(
         mul_u64_add_u64_div_u64(u64::MAX, u64::MAX, u64::MAX, 2),
         MUL_OVERFLOW
@@ -748,21 +849,24 @@ fn mul_u64_add_u64_div_u64_saturation_is_defined() {
         (((1u128 << 65) - 2) / 3) as u64
     );
     // 2^65/5 < 2^64 likewise.
-    assert_eq!(mul_u64_add_u64_div_u64(1 << 63, 4, 0, 5), ((1u128 << 65) / 5) as u64);
+    assert_eq!(
+        mul_u64_add_u64_div_u64(1 << 63, 4, 0, 5),
+        ((1u128 << 65) / 5) as u64
+    );
 }
 
 #[test]
 #[should_panic(expected = "division by zero")]
 fn mul_div_zero_panics_low_path() {
     // n_hi == 0 path reaches div64_u64(n_lo, 0)
-        let _ = mul_u64_add_u64_div_u64(0, 0, 7, 0);
+    let _ = mul_u64_add_u64_div_u64(0, 0, 7, 0);
 }
 
 #[test]
 #[should_panic(expected = "division by zero")]
 fn mul_div_zero_panics_high_path() {
     // n_hi >= d path asserts first
-        let _ = mul_u64_add_u64_div_u64(u64::MAX, u64::MAX, 0, 0);
+    let _ = mul_u64_add_u64_div_u64(u64::MAX, u64::MAX, 0, 0);
 }
 
 #[test]
@@ -779,7 +883,11 @@ fn mul_chunks_match_u128_split() {
         let c = vals[(i * 13 + 5) % vals.len()];
         let prod = (a as u128) * (b as u128) + c as u128;
         let (hi, lo) = mul_u64_u64_add_u64_chunks(a, b, c);
-        assert_eq!(((hi as u128) << 64) | lo as u128, prod, "a={a:#x} b={b:#x} c={c:#x}");
+        assert_eq!(
+            ((hi as u128) << 64) | lo as u128,
+            prod,
+            "a={a:#x} b={b:#x} c={c:#x}"
+        );
     }
 }
 
@@ -958,7 +1066,7 @@ fn reciprocal_divide_matches_native_random_full_range() {
 #[test]
 #[should_panic(expected = "division by zero")]
 fn reciprocal_value_zero_panics() {
-        let _ = reciprocal_value(0);
+    let _ = reciprocal_value(0);
 }
 
 #[test]
