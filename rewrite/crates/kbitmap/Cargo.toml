@@ -1,0 +1,8 @@
+[package]
+name = "kbitmap"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/bitmap.c + lib/find_bit.c (bitmaps and bit-search)"
+
+[dependencies]
