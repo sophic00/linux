@@ -120,8 +120,8 @@ pub fn encode(
 ) -> Result<usize, Error> {
     let full = src.len() / 3;
     let rem = src.len() % 3;
-    let outlen =
-        full * 4 + match rem {
+    let outlen = full * 4
+        + match rem {
             0 => 0,
             1 => {
                 if padding {

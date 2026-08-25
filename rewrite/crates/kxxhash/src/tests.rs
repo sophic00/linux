@@ -7,21 +7,11 @@
 
 extern crate alloc;
 
-use alloc::vec::Vec;
+use alloc::{vec, vec::Vec};
+
+use krand::{Krand, Rng};
 
 use super::*;
-
-/// Deterministic xorshift64 PRNG for test data.
-struct XorShift(u64);
-
-impl XorShift {
-    fn next(&mut self) -> u64 {
-        self.0 ^= self.0 << 13;
-        self.0 ^= self.0 >> 7;
-        self.0 ^= self.0 << 17;
-        self.0
-    }
-}
 
 #[test]
 fn canonical_xxh32_vectors() {
@@ -135,7 +125,14 @@ fn naive_xxh64(input: &[u8], seed: u64) -> u64 {
     let len = b.len();
     let get8 = |i: usize| {
         u64::from_le_bytes([
-            b[i], b[i + 1], b[i + 2], b[i + 3], b[i + 4], b[i + 5], b[i + 6], b[i + 7],
+            b[i],
+            b[i + 1],
+            b[i + 2],
+            b[i + 3],
+            b[i + 4],
+            b[i + 5],
+            b[i + 6],
+            b[i + 7],
         ])
     };
     let get4 = |i: usize| u32::from_le_bytes([b[i], b[i + 1], b[i + 2], b[i + 3]]) as u64;
@@ -174,12 +171,18 @@ fn naive_xxh64(input: &[u8], seed: u64) -> u64 {
     h = h.wrapping_add(len as u64);
     while i + 8 <= len {
         h ^= round(0, get8(i));
-        h = h.rotate_left(27).wrapping_mul(PRIME64_1).wrapping_add(PRIME64_4);
+        h = h
+            .rotate_left(27)
+            .wrapping_mul(PRIME64_1)
+            .wrapping_add(PRIME64_4);
         i += 8;
     }
     if i + 4 <= len {
         h ^= get4(i).wrapping_mul(PRIME64_1);
-        h = h.rotate_left(23).wrapping_mul(PRIME64_2).wrapping_add(PRIME64_3);
+        h = h
+            .rotate_left(23)
+            .wrapping_mul(PRIME64_2)
+            .wrapping_add(PRIME64_3);
         i += 4;
     }
     while i < len {
@@ -201,8 +204,7 @@ fn naive_xxh64(input: &[u8], seed: u64) -> u64 {
 /// len<4, 4..8, 8..32, >=32 for XXH64) at every residue mod 4/8/16/32.
 #[test]
 fn differential_vs_naive_all_lengths() {
-    let patterns: [&dyn Fn(usize) -> u8; 3] =
-        [&|_| 0u8, &|_| 0xFFu8, &|i| (i * 31 % 251) as u8];
+    let patterns: [&dyn Fn(usize) -> u8; 3] = [&|_| 0u8, &|_| 0xFFu8, &|i| (i * 31 % 251) as u8];
 
     for len in 0..=300usize {
         for pat in patterns {
@@ -230,12 +232,13 @@ fn differential_vs_naive_all_lengths() {
 /// Randomized differential fuzz with random lengths and content.
 #[test]
 fn differential_vs_naive_fuzz() {
-    let mut rng = XorShift(0xDEAD_BEEF_CAFE_F00D);
+    let mut rng = Krand::seed_from_u64(0xDEAD_BEEF_CAFE_F00D);
     for _ in 0..200 {
-        let len = (rng.next() % 1024) as usize;
-        let input: Vec<u8> = (0..len).map(|_| rng.next() as u8).collect();
-        let s32 = rng.next() as u32;
-        let s64 = rng.next();
+        let len = rng.below(1024) as usize;
+        let mut input = vec![0u8; len];
+        rng.fill_bytes(&mut input);
+        let s32 = rng.next_u32();
+        let s64 = rng.next_u64();
         assert_eq!(xxh32(&input, s32), naive_xxh32(&input, s32), "len {len}");
         assert_eq!(xxh64(&input, s64), naive_xxh64(&input, s64), "len {len}");
     }

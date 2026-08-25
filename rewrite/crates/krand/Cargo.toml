@@ -1,0 +1,8 @@
+[package]
+name = "krand"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Deterministic PRNG utilities for the Linux kernel Rust rewrite test suites"
+
+[dependencies]

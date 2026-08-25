@@ -7,6 +7,8 @@ extern crate alloc;
 
 use alloc::{vec, vec::Vec};
 
+use krand::{Krand, Rng};
+
 use super::*;
 
 #[test]
@@ -22,9 +24,30 @@ fn empty_and_single() {
 
 #[test]
 fn two_elements() {
-    assert_eq!({ let mut v = vec![2u32, 1]; heapsort(&mut v); v }, [1, 2]);
-    assert_eq!({ let mut v = vec![1u32, 2]; heapsort(&mut v); v }, [1, 2]);
-    assert_eq!({ let mut v = vec![7u32, 7]; heapsort(&mut v); v }, [7, 7]);
+    assert_eq!(
+        {
+            let mut v = vec![2u32, 1];
+            heapsort(&mut v);
+            v
+        },
+        [1, 2]
+    );
+    assert_eq!(
+        {
+            let mut v = vec![1u32, 2];
+            heapsort(&mut v);
+            v
+        },
+        [1, 2]
+    );
+    assert_eq!(
+        {
+            let mut v = vec![7u32, 7];
+            heapsort(&mut v);
+            v
+        },
+        [7, 7]
+    );
 }
 
 #[test]
@@ -56,18 +79,11 @@ fn payload_stays_attached() {
         tag: usize,
     }
     const N: usize = 4096;
-    let mut rng = 0x1234_5678_u64;
-    let mut next = move || {
-        // xorshift64
-        rng ^= rng << 13;
-        rng ^= rng >> 7;
-        rng ^= rng << 17;
-        rng
-    };
+    let mut rng = Krand::seed_from_u64(0x1234_5678);
 
     let mut v: Vec<Elem> = (0..N)
         .map(|i| Elem {
-            key: (next() % 100) as u32,
+            key: rng.below(100) as u32,
             tag: i,
         })
         .collect();
@@ -88,23 +104,20 @@ fn payload_stays_attached() {
     expect.sort_by_key(|&(k, _)| k);
     let want: Vec<u32> = expect.into_iter().map(|(k, _)| k).collect();
     let got: Vec<u32> = v.iter().map(|e| e.key).collect();
-    assert_eq!(got, want);
+    ktest_util::assert_same_elements(&got, &want);
 }
 
 /// Differential fuzz against the standard library's sort.
 #[test]
 fn differential_vs_std() {
-    fn lcg(state: &mut u64) -> u64 {
-        *state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
-        *state >> 33
-    }
-
     for &n in &[0usize, 1, 2, 3, 4, 5, 10, 33, 64, 100, 1000, 5000] {
         for seed in 0..16u64 {
-            let mut s = seed ^ 0xdead_beef;
+            // Per-(n, seed) independent stream; same iteration counts and
+            // value ranges as before.
+            let mut rng = Krand::seed_from_u64(seed ^ 0xdead_beef);
 
             // Random values.
-            let mut v: Vec<u32> = (0..n).map(|_| (lcg(&mut s) % 50) as u32).collect();
+            let mut v: Vec<u32> = (0..n).map(|_| rng.below(50) as u32).collect();
             let expect = v.clone();
             heapsort(&mut v);
             let mut e = expect;
@@ -127,7 +140,7 @@ fn differential_vs_std() {
             assert_eq!(v, vec![7; n], "equal n={n}");
 
             // Descending comparator exercises the other comparison branch.
-            let mut v: Vec<u32> = (0..n as u32).map(|_| (lcg(&mut s) % 97) as u32).collect();
+            let mut v: Vec<u32> = (0..n as u32).map(|_| rng.below(97) as u32).collect();
             let mut e = v.clone();
             heapsort_by(&mut v, |a, b| b.cmp(a));
             e.sort_unstable_by(|a, b| b.cmp(a));
@@ -185,7 +198,14 @@ fn bsearch_empty() {
 fn sort_r_matches_c_reference_semantics() {
     // Sort by one field while verifying total ordering afterwards.
     let mut v: Vec<(u32, char)> = vec![
-        (5, 'a'), (1, 'b'), (4, 'c'), (1, 'd'), (3, 'e'), (9, 'f'), (2, 'g'), (6, 'h'),
+        (5, 'a'),
+        (1, 'b'),
+        (4, 'c'),
+        (1, 'd'),
+        (3, 'e'),
+        (9, 'f'),
+        (2, 'g'),
+        (6, 'h'),
     ];
     heapsort_by(&mut v, |a, b| a.0.cmp(&b.0));
     let keys: Vec<u32> = v.iter().map(|x| x.0).collect();

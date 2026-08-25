@@ -175,13 +175,19 @@ pub fn xxh64(input: &[u8], seed: u64) -> u64 {
     while p.len() >= 8 {
         let k1 = xxh64_round(0, read_le64(p));
         h64 ^= k1;
-        h64 = h64.rotate_left(27).wrapping_mul(PRIME64_1).wrapping_add(PRIME64_4);
+        h64 = h64
+            .rotate_left(27)
+            .wrapping_mul(PRIME64_1)
+            .wrapping_add(PRIME64_4);
         p = &p[8..];
     }
 
     if p.len() >= 4 {
         h64 ^= (read_le32(p) as u64).wrapping_mul(PRIME64_1);
-        h64 = h64.rotate_left(23).wrapping_mul(PRIME64_2).wrapping_add(PRIME64_3);
+        h64 = h64
+            .rotate_left(23)
+            .wrapping_mul(PRIME64_2)
+            .wrapping_add(PRIME64_3);
         p = &p[4..];
     }
 

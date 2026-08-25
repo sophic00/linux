@@ -90,7 +90,11 @@ where
                 }
                 break;
             }
-            b = if cmp(&v[c], &v[d]) == Ordering::Greater { c } else { d };
+            b = if cmp(&v[c], &v[d]) == Ordering::Greater {
+                c
+            } else {
+                d
+            };
         }
 
         // Now backtrack from "b" to the correct location for "a".

@@ -6,3 +6,6 @@ license.workspace = true
 description = "Rust rewrite of the Linux kernel's lib/base64.c multi-variant base64 encoding"
 
 [dependencies]
+
+[dev-dependencies]
+krand = { path = "../krand" }

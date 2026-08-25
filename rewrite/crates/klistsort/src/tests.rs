@@ -9,23 +9,9 @@ extern crate alloc;
 
 use alloc::{vec, vec::Vec};
 
+use krand::{Krand, Rng};
+
 use super::*;
-
-/// Deterministic xorshift64 RNG, same style as the kernel test's rnd.
-struct Rng(u64);
-
-impl Rng {
-    fn next(&mut self) -> u64 {
-        self.0 ^= self.0 << 13;
-        self.0 ^= self.0 >> 7;
-        self.0 ^= self.0 << 17;
-        self.0
-    }
-
-    fn below(&mut self, n: u64) -> u64 {
-        self.next() % n
-    }
-}
 
 /// Builds a list of (key, tag) pairs; tags record the input order.
 fn make_list(keys: &[u32]) -> List<(u32, usize)> {
@@ -127,19 +113,18 @@ fn already_reverse_and_equal() {
 /// sorted with every element preserved.
 #[test]
 fn random_fuzz_matches_std() {
-    let mut rng = Rng(0x1234_5678_dead_beef);
+    let mut rng = Krand::seed_from_u64(0x1234_5678_dead_beef);
 
     for &n in &[
-        2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64, 65, 127, 128,
-        255, 256, 257, 511, 512, 513, 1000, 4096,
+        2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64, 65, 127, 128, 255, 256, 257, 511, 512,
+        513, 1000, 4096,
     ] {
         let keys: Vec<u32> = (0..n).map(|_| (rng.below(50)) as u32).collect();
         let mut l = make_list(&keys);
         l.list_sort(|a, b| a.0.cmp(&b.0));
         check_sorted_stable(&l, n);
 
-        let mut expect: Vec<(u32, usize)> =
-            keys.iter().copied().zip(0..n).collect();
+        let mut expect: Vec<(u32, usize)> = keys.iter().copied().zip(0..n).collect();
         expect.sort_by_key(|&(k, _)| k); // std stable sort
         let want_tags: Vec<usize> = expect.iter().map(|&(_, t)| t).collect();
         assert_eq!(tags_of(&l), want_tags, "stability mismatch n={n}");
@@ -157,7 +142,7 @@ fn comparison_budget() {
         a.0.cmp(&b.0)
     };
 
-    let mut rng = Rng(0xfeed_c0de);
+    let mut rng = Krand::seed_from_u64(0xfeed_c0de);
     for &n in &[16usize, 64, 256, 1024, 4096] {
         let keys: Vec<u32> = (0..n).map(|_| rng.below(u32::MAX as u64) as u32).collect();
         let mut l = make_list(&keys);

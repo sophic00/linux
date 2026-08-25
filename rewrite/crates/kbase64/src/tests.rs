@@ -1,5 +1,5 @@
 //! Tests ported from the kernel's `lib/tests/base64_kunit.c`, plus
-//! round-trip property tests over random buffers using xorshift64.
+//! round-trip property tests over random buffers using `krand`.
 //!
 //! The KUnit benchmark cases are not ported (they measure timing).
 
@@ -8,6 +8,8 @@
 extern crate alloc;
 
 use alloc::{string::String, vec, vec::Vec};
+
+use krand::{Krand, Rng};
 
 use super::*;
 
@@ -50,7 +52,12 @@ fn base64_std_encode_tests() {
     expect_encode_ok(b"foobar", "Zm9vYmFy", true, Base64Variant::Std);
 
     // Extra cases with padding
-    expect_encode_ok(b"Hello, world!", "SGVsbG8sIHdvcmxkIQ==", true, Base64Variant::Std);
+    expect_encode_ok(
+        b"Hello, world!",
+        "SGVsbG8sIHdvcmxkIQ==",
+        true,
+        Base64Variant::Std,
+    );
     expect_encode_ok(
         b"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=",
@@ -63,7 +70,12 @@ fn base64_std_encode_tests() {
         true,
         Base64Variant::Std,
     );
-    expect_encode_ok(b"0123456789+/", "MDEyMzQ1Njc4OSsv", true, Base64Variant::Std);
+    expect_encode_ok(
+        b"0123456789+/",
+        "MDEyMzQ1Njc4OSsv",
+        true,
+        Base64Variant::Std,
+    );
 
     // Without padding
     expect_encode_ok(b"", "", false, Base64Variant::Std);
@@ -75,7 +87,12 @@ fn base64_std_encode_tests() {
     expect_encode_ok(b"foobar", "Zm9vYmFy", false, Base64Variant::Std);
 
     // Extra cases without padding
-    expect_encode_ok(b"Hello, world!", "SGVsbG8sIHdvcmxkIQ", false, Base64Variant::Std);
+    expect_encode_ok(
+        b"Hello, world!",
+        "SGVsbG8sIHdvcmxkIQ",
+        false,
+        Base64Variant::Std,
+    );
     expect_encode_ok(
         b"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo",
@@ -88,7 +105,12 @@ fn base64_std_encode_tests() {
         false,
         Base64Variant::Std,
     );
-    expect_encode_ok(b"0123456789+/", "MDEyMzQ1Njc4OSsv", false, Base64Variant::Std);
+    expect_encode_ok(
+        b"0123456789+/",
+        "MDEyMzQ1Njc4OSsv",
+        false,
+        Base64Variant::Std,
+    );
 }
 
 #[test]
@@ -101,7 +123,12 @@ fn base64_std_decode_tests() {
     expect_decode_ok(b"Zm9vYg==", b"foob", true, Base64Variant::Std);
     expect_decode_ok(b"Zm9vYmE=", b"fooba", true, Base64Variant::Std);
     expect_decode_ok(b"Zm9vYmFy", b"foobar", true, Base64Variant::Std);
-    expect_decode_ok(b"SGVsbG8sIHdvcmxkIQ==", b"Hello, world!", true, Base64Variant::Std);
+    expect_decode_ok(
+        b"SGVsbG8sIHdvcmxkIQ==",
+        b"Hello, world!",
+        true,
+        Base64Variant::Std,
+    );
     expect_decode_ok(
         b"QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=",
         b"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -135,7 +162,12 @@ fn base64_std_decode_tests() {
     expect_decode_ok(b"Zm9vYmE", b"fooba", false, Base64Variant::Std);
     expect_decode_ok(b"Zm9vYmFy", b"foobar", false, Base64Variant::Std);
     expect_decode_ok(b"TWFu", b"Man", false, Base64Variant::Std);
-    expect_decode_ok(b"SGVsbG8sIHdvcmxkIQ", b"Hello, world!", false, Base64Variant::Std);
+    expect_decode_ok(
+        b"SGVsbG8sIHdvcmxkIQ",
+        b"Hello, world!",
+        false,
+        Base64Variant::Std,
+    );
     expect_decode_ok(
         b"QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo",
         b"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -148,7 +180,12 @@ fn base64_std_decode_tests() {
         false,
         Base64Variant::Std,
     );
-    expect_decode_ok(b"MDEyMzQ1Njc4OSsv", b"0123456789+/", false, Base64Variant::Std);
+    expect_decode_ok(
+        b"MDEyMzQ1Njc4OSsv",
+        b"0123456789+/",
+        false,
+        Base64Variant::Std,
+    );
 
     // Error cases
     expect_decode_err(b"Zg=!", false, Base64Variant::Std);
@@ -274,17 +311,6 @@ fn naive_encode(src: &[u8], table: &[u8; 64], padding: bool) -> String {
     out
 }
 
-struct Xorshift64(u64);
-
-impl Xorshift64 {
-    fn next(&mut self) -> u64 {
-        self.0 ^= self.0 << 13;
-        self.0 ^= self.0 >> 7;
-        self.0 ^= self.0 << 17;
-        self.0
-    }
-}
-
 #[test]
 fn roundtrip_property_all_variants() {
     const TABLES: [&[u8; 64]; 3] = [
@@ -298,10 +324,11 @@ fn roundtrip_property_all_variants() {
         (Base64Variant::Imap, 2),
     ];
 
-    let mut rng = Xorshift64(0x1234_5678_9abc_def0);
+    let mut rng = Krand::seed_from_u64(0x1234_5678_9abc_def0);
 
     for len in 0..300usize {
-        let src: Vec<u8> = (0..len).map(|_| (rng.next() & 0xff) as u8).collect();
+        let mut src = vec![0u8; len];
+        rng.fill_bytes(&mut src);
 
         for &(variant, ti) in &variants {
             for &padding in &[true, false] {
@@ -311,7 +338,11 @@ fn roundtrip_property_all_variants() {
 
                 // Differential: must match the independent RFC encoder exactly.
                 let want = naive_encode(&src, TABLES[ti], padding);
-                assert_eq!(&enc[..enc_len], want.as_bytes(), "len {len} v{ti} pad {padding}");
+                assert_eq!(
+                    &enc[..enc_len],
+                    want.as_bytes(),
+                    "len {len} v{ti} pad {padding}"
+                );
 
                 // Round-trip: decode must reproduce the original.
                 let mut dec = vec![0u8; enc_len.div_ceil(4) * 3]; // matches decode() capacity contract
@@ -326,11 +357,16 @@ fn roundtrip_property_all_variants() {
 
 #[test]
 fn roundtrip_random_large_buffers() {
-    let mut rng = Xorshift64(0xdead_beef_cafe_f00d);
+    let mut rng = Krand::seed_from_u64(0xdead_beef_cafe_f00d);
     for _ in 0..50 {
-        let len = (rng.next() % 8192) as usize;
-        let src: Vec<u8> = (0..len).map(|_| (rng.next() & 0xff) as u8).collect();
-        for &variant in &[Base64Variant::Std, Base64Variant::Urlsafe, Base64Variant::Imap] {
+        let len = rng.below(8192) as usize;
+        let mut src = vec![0u8; len];
+        rng.fill_bytes(&mut src);
+        for &variant in &[
+            Base64Variant::Std,
+            Base64Variant::Urlsafe,
+            Base64Variant::Imap,
+        ] {
             for &padding in &[true, false] {
                 let mut enc = vec![0u8; len.div_ceil(3) * 4]; // exact worst case (BASE64_CHARS underestimates when padding)
                 let enc_len = encode(&src, &mut enc, padding, variant).unwrap();
@@ -351,27 +387,51 @@ fn exhaustive_roundtrip_vs_rfc_oracle() {
         b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+,",
     ];
     fn naive(src: &[u8], table: &[u8; 64], padding: bool) -> Vec<u8> {
-        let mut acc: u32 = 0; let mut bits = 0u32; let mut out = Vec::new();
-        for &b in src { acc = (acc << 8) | b as u32; bits += 8;
-            while bits >= 6 { bits -= 6; out.push(table[((acc >> bits) & 0x3f) as usize]); } }
-        if bits > 0 { out.push(table[((acc << (6 - bits)) & 0x3f) as usize]); }
-        if padding { while out.len() % 4 != 0 { out.push(b'='); } }
+        let mut acc: u32 = 0;
+        let mut bits = 0u32;
+        let mut out = Vec::new();
+        for &b in src {
+            acc = (acc << 8) | b as u32;
+            bits += 8;
+            while bits >= 6 {
+                bits -= 6;
+                out.push(table[((acc >> bits) & 0x3f) as usize]);
+            }
+        }
+        if bits > 0 {
+            out.push(table[((acc << (6 - bits)) & 0x3f) as usize]);
+        }
+        if padding {
+            while out.len() % 4 != 0 {
+                out.push(b'=');
+            }
+        }
         out
     }
-    let variants = [(Base64Variant::Std, 0usize), (Base64Variant::Urlsafe, 1), (Base64Variant::Imap, 2)];
+    let variants = [
+        (Base64Variant::Std, 0usize),
+        (Base64Variant::Urlsafe, 1),
+        (Base64Variant::Imap, 2),
+    ];
     for len in 0..1200usize {
-        let mut r2 = Xorshift64(0xfeed_face);
-        let src: Vec<u8> = (0..len).map(|_| (r2.next() & 0xff) as u8).collect();
+        let mut r2 = Krand::seed_from_u64(0xfeed_face);
+        let mut src = vec![0u8; len];
+        r2.fill_bytes(&mut src);
         for &(variant, ti) in &variants {
             let table: &[u8; 64] = TABLES[ti];
             for &padding in &[true, false] {
                 let want = naive(&src, table, padding);
                 let mut enc = vec![0u8; len.div_ceil(3) * 4];
                 let enc_len = encode(&src, &mut enc, padding, variant).unwrap();
-                assert_eq!(&enc[..enc_len], &want[..], "ENC mismatch len={len} v={ti} pad={padding}");
+                assert_eq!(
+                    &enc[..enc_len],
+                    &want[..],
+                    "ENC mismatch len={len} v={ti} pad={padding}"
+                );
                 let mut dec = vec![0u8; enc_len.div_ceil(4) * 3 + 3];
-                let dec_len = decode(&want, &mut dec, padding, variant)
-                    .unwrap_or_else(|_| { panic!("DEC err len={len} v={ti} pad={padding}"); });
+                let dec_len = decode(&want, &mut dec, padding, variant).unwrap_or_else(|_| {
+                    panic!("DEC err len={len} v={ti} pad={padding}");
+                });
                 if dec_len != len || dec[..dec_len] != src[..] {
                     panic!("RT mismatch len={len} v={ti} pad={padding} dec_len={dec_len}");
                 }
