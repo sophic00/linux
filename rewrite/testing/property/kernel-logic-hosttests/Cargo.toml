@@ -1,0 +1,9 @@
+[package]
+name = "kernel-logic-hosttests"
+version = "0.1.0"
+edition = "2021"
+description = "Host-side property tests over pure kernel logic modules (zero external deps; works offline)"
+
+# This crate is host-only tooling for the rewrite program; it is NOT built by
+# kbuild. The tested module is included verbatim from its canonical location
+# via #[path], so what is tested is exactly what ships.

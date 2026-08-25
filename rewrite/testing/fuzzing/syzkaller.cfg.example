@@ -1,0 +1,21 @@
+{
+	"target": "my-qemu-x86_64",
+	"http": "127.0.0.1:56741",
+	"workdir": "/path/to/syzkaller/workdir",
+	"kernel_obj": "/tmp/rewrite-build-x86",
+	"image": "/path/to/bullseye.img",
+	"sshkey": "/path/to/bullseye.id_rsa",
+	"syzkaller": "/path/to/syzkaller",
+	"procs": 8,
+	"type": "qemu",
+	"vm": {
+		"count": 6,
+		"kernel": "/tmp/rewrite-build-x86/arch/x86/boot/bzImage",
+		"cpu": 2,
+		"mem": 2048
+	},
+	"reproduce": true,
+	"enable_syscalls": [
+		"open$foo", "ioctl$foo_$*", "read$foo", "write$foo", "close$foo"
+	]
+}

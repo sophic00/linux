@@ -1,0 +1,13 @@
+# Extended KUnit config for Rust rewrite verification.
+# Base fragment is rust/.kunitconfig (KUNIT, RUST, RUST_KERNEL_DOCTESTS).
+# Layer this on top:  kunit.py run --kunitconfig rust/.kunitconfig --kunitconfig rewrite/testing/kunit/rust-extended.kunitconfig
+CONFIG_KUNIT_ALL_TESTS=y
+CONFIG_RUST_KERNEL_DOCTESTS=y
+CONFIG_SAMPLES=y
+CONFIG_SAMPLES_RUST=y
+
+# Sanitizer visibility for mixed C/Rust (runtime layer)
+CONFIG_KASAN=y
+CONFIG_KCSAN=y
+CONFIG_DEBUG_SPINLOCK=y
+CONFIG_PROVE_LOCKING=y          # lockdep
