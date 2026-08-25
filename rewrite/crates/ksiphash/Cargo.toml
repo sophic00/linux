@@ -1,0 +1,8 @@
+[package]
+name = "ksiphash"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/siphash.c: SipHash-2-4 PRF and HalfSipHash-1-3 (64-bit build configuration)"
+
+[dependencies]
