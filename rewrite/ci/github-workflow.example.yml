@@ -1,0 +1,21 @@
+name: rust-rewrite
+
+on:
+  push:
+    paths: ["rewrite/**"]
+  pull_request:
+    paths: ["rewrite/**"]
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rewrite
+      - name: Quality gates (fmt, clippy -D warnings, tests)
+        run: rewrite/scripts/check.sh
