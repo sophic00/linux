@@ -1,0 +1,8 @@
+[package]
+name = "kcrc32"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/crc/crc32-main.c: crc32_le, crc32_be, crc32c with slice-by-8 tables"
+
+[dependencies]
