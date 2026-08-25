@@ -64,6 +64,7 @@
 #include <linux/fs.h>
 #include <linux/i2c.h>
 #include <linux/interrupt.h>
+#include <linux/io.h>
 #include <linux/io-pgtable.h>
 #include <linux/ioport.h>
 #include <linux/iosys-map.h>
@@ -73,6 +74,7 @@
 #include <linux/mm.h>
 #include <linux/miscdevice.h>
 #include <linux/of_device.h>
+#include <linux/of_reserved_mem.h>
 #include <linux/pci.h>
 #include <linux/phy.h>
 #include <linux/pid_namespace.h>
