@@ -1,0 +1,8 @@
+[package]
+name = "kminheap"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/min_heap.c (+ include/linux/min_heap.h) capacity-bounded binary min-heap"
+
+[dependencies]
