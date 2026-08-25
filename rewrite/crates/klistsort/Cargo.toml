@@ -1,0 +1,6 @@
+[package]
+name = "klistsort"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/list_sort.c bottom-up merge sort over an owned linked list"
