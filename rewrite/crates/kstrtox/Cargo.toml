@@ -1,0 +1,8 @@
+[package]
+name = "kstrtox"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/kstrtox.c integer/boolean string conversion"
+
+[dependencies]

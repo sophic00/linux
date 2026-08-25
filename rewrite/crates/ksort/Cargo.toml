@@ -1,0 +1,8 @@
+[package]
+name = "ksort"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/sort.c (bottom-up heapsort) and lib/bsearch.c"
+
+[dependencies]
