@@ -7,6 +7,10 @@ name = "kbase64"
 version = "0.1.0"
 
 [[package]]
+name = "kglob"
+version = "0.1.0"
+
+[[package]]
 name = "ksort"
 version = "0.1.0"
 
