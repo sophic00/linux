@@ -66,7 +66,9 @@ fn parse_integer_fixup_radix<'a>(mut s: &'a [u8], base: &mut u32) -> &'a [u8] {
             *base = 10;
         }
     }
-    if *base == 16 && s.first() == Some(&b'0') && s.get(1).map_or(b'\0', |c| c.to_ascii_lowercase()) == b'x'
+    if *base == 16
+        && s.first() == Some(&b'0')
+        && s.get(1).map_or(b'\0', |c| c.to_ascii_lowercase()) == b'x'
     {
         s = &s[2..];
     }
@@ -100,7 +102,10 @@ fn parse_integer_limit(s: &[u8], base: u32, max_chars: usize) -> (u32, u64) {
         }
         // Check for overflow only within range of it for the max base (16).
         if res & (u64::MAX << 60) != 0 {
-            match res.checked_mul(base as u64).and_then(|r| r.checked_add(val as u64)) {
+            match res
+                .checked_mul(base as u64)
+                .and_then(|r| r.checked_add(val as u64))
+            {
                 Some(r) => res = r,
                 None => {
                     res = u64::MAX;
@@ -142,7 +147,11 @@ fn kstrtoull_inner(s: &[u8], mut base: u32) -> Result<u64, Error> {
 /// accepted, but not `-`.
 pub fn kstrtoull(s: &str, base: u32) -> Result<u64, Error> {
     let bytes = s.as_bytes();
-    let bytes = if bytes.first() == Some(&b'+') { &bytes[1..] } else { bytes };
+    let bytes = if bytes.first() == Some(&b'+') {
+        &bytes[1..]
+    } else {
+        bytes
+    };
     kstrtoull_inner(bytes, base)
 }
 

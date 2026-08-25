@@ -6,3 +6,6 @@ license.workspace = true
 description = "Rust rewrite of the Linux kernel's lib/kstrtox.c integer/boolean string conversion"
 
 [dependencies]
+
+[dev-dependencies]
+krand = { path = "../krand" }

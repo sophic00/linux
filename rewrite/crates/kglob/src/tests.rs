@@ -8,6 +8,8 @@ extern crate alloc;
 
 use alloc::{vec, vec::Vec};
 
+use krand::{Krand, Rng};
+
 use super::*;
 
 /// The ported `glob_test_cases[]` table from lib/tests/glob_kunit.c.
@@ -104,7 +106,7 @@ fn c_quirk_cases() {
     assert!(glob_match("[a", "[a"));
     assert!(!glob_match("[a", "a"));
     assert!(glob_match("*[x", "ab[x")); // literal fallback after '*'
-    // Range with missing upper bound: malformed -> literal '['.
+                                        // Range with missing upper bound: malformed -> literal '['.
     assert!(glob_match("[a-", "[a-"));
     assert!(!glob_match("[a-", "[a"));
     // '-' right before ']' is a literal span member.
@@ -126,7 +128,7 @@ fn c_quirk_cases() {
     assert!(glob_match("a\\\\b", "a\\b"));
     // '*' optimizes the trailing-* case even after failures.
     assert!(glob_match("*aaaaa", "aaaaaaaaaa")); // documented worst case
-    // Empty pattern / empty string edge interplay with '*'.
+                                                 // Empty pattern / empty string edge interplay with '*'.
     assert!(glob_match("*", ""));
     assert!(glob_match("**", ""));
     assert!(glob_match("*", "anything"));
@@ -281,7 +283,12 @@ fn exhaustive_differential() {
         check_pattern(pat, STR_ALPHABET, 0..=4, &mut checked);
     }
 
-    fn check_pattern(pat: &[u8], str_alphabet: &[u8], str_len: core::ops::RangeInclusive<usize>, checked: &mut usize) {
+    fn check_pattern(
+        pat: &[u8],
+        str_alphabet: &[u8],
+        str_len: core::ops::RangeInclusive<usize>,
+        checked: &mut usize,
+    ) {
         // All strings of each length exhaustively.
         fn gen_strings(alphabet: &[u8], len: usize, prefix: &mut Vec<u8>, out: &mut Vec<Vec<u8>>) {
             if prefix.len() == len {
@@ -330,19 +337,17 @@ fn randomized_differential() {
     const PAT_ALPHABET: &[u8] = b"ab*?[]!-\\";
     const STR_ALPHABET: &[u8] = b"abc";
 
-    let mut state = 0xc0ffee_u64;
-    let mut rnd = move || {
-        state ^= state << 13;
-        state ^= state >> 7;
-        state ^= state << 17;
-        state
-    };
+    let mut rnd = Krand::seed_from_u64(0xc0ffee);
 
     for _ in 0..20_000 {
-        let plen = (rnd() % 12) as usize;
-        let slen = (rnd() % 12) as usize;
-        let pat: Vec<u8> = (0..plen).map(|_| PAT_ALPHABET[(rnd() as usize) % PAT_ALPHABET.len()]).collect();
-        let s: Vec<u8> = (0..slen).map(|_| STR_ALPHABET[(rnd() as usize) % STR_ALPHABET.len()]).collect();
+        let plen = rnd.below(12);
+        let slen = rnd.below(12);
+        let pat: Vec<u8> = (0..plen)
+            .map(|_| PAT_ALPHABET[rnd.below_usize(PAT_ALPHABET.len())])
+            .collect();
+        let s: Vec<u8> = (0..slen)
+            .map(|_| STR_ALPHABET[rnd.below_usize(STR_ALPHABET.len())])
+            .collect();
         assert_eq!(
             matches(&pat, &s),
             ref_match(&pat, &s),

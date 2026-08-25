@@ -1,11 +1,9 @@
 [package]
-name = "kglob"
+name = "ktest-util"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Rust rewrite of the Linux kernel's lib/glob.c shell-style pattern matching"
+description = "Shared test helpers (multiset asserts, fuzz driver) for the kernel rewrite workspace"
 
 [dependencies]
-
-[dev-dependencies]
 krand = { path = "../krand" }
