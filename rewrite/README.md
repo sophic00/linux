@@ -14,10 +14,16 @@ rewrite/
 └── crates/
     ├── kstrtox/            # lib/kstrtox.c  — integer/boolean string parsing
     │   └── src/tests.rs    #   ported from lib/test-kstrtox.c
-    └── ksort/              # lib/sort.c     — bottom-up heapsort
-        │                   # lib/bsearch.c  — binary search
-        └── src/tests.rs    #   incl. differential fuzz vs std::sort,
-                            #   modeled on lib/tests/test_sort.c
+    ├── ksort/              # lib/sort.c     — bottom-up heapsort
+    │   │                   # lib/bsearch.c  — binary search
+    │   └── src/tests.rs    #   incl. differential fuzz vs std::sort,
+    │                       #   modeled on lib/tests/test_sort.c
+    ├── kbase64/            # lib/base64.c   — base64 encode/decode
+    │   └── src/tests.rs    #   ported from lib/tests/base64_kunit.c
+    ├── kglob/              # lib/glob.c     — glob_match with [] classes
+    │   └── src/tests.rs    #   ported from lib/tests/glob_kunit.c + naive-matcher differential
+    └── klistsort/          # lib/list_sort.c— bottom-up merge sort for linked lists
+        └── src/tests.rs    #   stability + fuzz, modeled on lib/tests/test_list_sort.c
 ```
 
 ## Component map
@@ -28,6 +34,9 @@ rewrite/
 | `lib/test-kstrtox.c` | `kstrtox::tests` | ok/fail tables ported                                        |
 | `lib/sort.c`         | `ksort::heapsort_by` | Bottom-up heapsort; alignment-dispatch swap routines unnecessary in Rust |
 | `lib/bsearch.c`      | `ksort::bsearch_by`  | Generic binary search                                    |
+| `lib/base64.c`       | `kbase64`        | Charset variants preserved; C length-macro underestimate documented |
+| `lib/glob.c`         | `kglob`          | `[]` class parsing quirks mirrored bit-for-bit           |
+| `lib/list_sort.c`    | `klistsort`      | Same bottom-up pending-runs merge algorithm over owned lists |
 | `lib/tests/test_sort.c` | `ksort::tests`| Randomized differential testing vs std                        |
 
 ## Why these first
@@ -48,13 +57,9 @@ cargo clippy -- -D warnings
 
 ## Roadmap (next candidates in this repo)
 
-1. `lib/base64.c`, `lib/glob.c`, `lib/ctype helpers` — more pure logic
-2. `lib/rbtree.c`, `lib/list_sort.c` — intrusive containers become
-   ownership-based generic containers (see also the kernel's own
-   `rust/kernel/rbtree.rs`)
-3. `lib/crc32.c`, `lib/xxhash.c` — checksums, cross-checked against the C
-   test vectors
-4. Parser layer: `lib/cmdline.c`, `vsprintf.c` format handling
+1. `lib/xxhash.c` — in progress (`rust/kxxhash` branch)
+2. `lib/rbtree.c`, `lib/ctype helpers`, `parser layer: lib/cmdline.c`
+3. `lib/crc32.c` — checksums, cross-checked against the C test vectors
 
 Longer term, anything touching memory management, IRQs, or drivers must go
 through the kernel's official Rust abstractions (`rust/kernel/`) rather than
