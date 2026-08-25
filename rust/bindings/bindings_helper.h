@@ -82,6 +82,7 @@
 #include <linux/property.h>
 #include <linux/pwm.h>
 #include <linux/random.h>
+#include <linux/reboot.h>
 #include <linux/refcount.h>
 #include <linux/regulator/consumer.h>
 #include <linux/sched.h>
@@ -89,6 +90,7 @@
 #include <linux/serdev.h>
 #include <linux/slab.h>
 #include <linux/sys_soc.h>
+#include <linux/sysrq.h>
 #include <linux/task_work.h>
 #include <linux/tracepoint.h>
 #include <linux/usb.h>
