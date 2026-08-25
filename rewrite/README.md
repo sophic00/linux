@@ -47,6 +47,22 @@ be *provably* equivalent. They are also heavily used: `kstrtoull` has hundreds
 of callers across `kernel/`, `fs/`, `drivers/`, and `sort()` underpins rbtree
 and list operations.
 
+## Verification policy (MERGE BLOCKER)
+
+No crate merges to `master` without:
+1. Full quality gate (`scripts/check.sh`): rustfmt, clippy `-D warnings`, tests,
+   and presence of Kani harnesses in `src/verify.rs`.
+2. At least two Kani proofs returning `VERIFIED` for that crate:
+   panic-freedom over bounded symbolic inputs, plus one spec-equivalence or
+   core-property proof. Run via `scripts/verify.sh` (kani-bounded, per-harness
+   timeout).
+3. For components with mathematical contracts, a Lean theorem in
+   `rewrite/lean/Specs/` (axiom-free, checked by `lake build`) stating the
+   contract the Rust implements.
+
+Exhaustive finite-domain tests and oracle-differential fuzzing remain
+mandatory in addition — they catch what bounded proofs don't cover.
+
 ## Build & test
 
 ```sh
