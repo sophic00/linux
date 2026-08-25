@@ -1,0 +1,8 @@
+[package]
+name = "khexdump"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/hexdump.c (hex_to_bin/hex2bin/bin2hex/hex_dump_to_buffer)"
+
+[dependencies]
