@@ -1,0 +1,6 @@
+[package]
+name = "kmath64"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/math/div64.c, lib/math/gcd.c and lib/math/reciprocal_div.c 64-bit arithmetic helpers"
