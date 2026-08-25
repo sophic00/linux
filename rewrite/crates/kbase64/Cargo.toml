@@ -1,0 +1,8 @@
+[package]
+name = "kbase64"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rust rewrite of the Linux kernel's lib/base64.c multi-variant base64 encoding"
+
+[dependencies]
